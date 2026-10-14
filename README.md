@@ -1,2 +1,2 @@
 # Commerce-digitalis-e
-Application Boutique 
+Boutique 
