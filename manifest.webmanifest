@@ -1,6 +1,6 @@
 {
-  "name": "Gestion de stock",
-  "short_name": "Stock",
+  "name": "DIGINKA",
+  "short_name": "DIGINKA",
   "description": "Gestion de stock et ventes, utilisable sans connexion",
   "start_url": "./",
   "scope": "./",
