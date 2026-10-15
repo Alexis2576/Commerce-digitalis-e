@@ -339,12 +339,45 @@ function renderMenu() {
   const d = droits(), n = enAttente().length;
   const items = [['vente', '🛒', 'Vente']];
   if (d.entrer) items.push(['entree', '📥', 'Entrée']);
-  items.push(['stock', '📦', 'Stock'], ['ops', '🧾', 'Opérations'], ['plus', '⚙️', 'Plus']);
+  items.push(['stock', '📦', 'Stock'], ['ops', '🧾', 'Opérations'], ['plus', '⚙️', 'Plus'], ['nouveau-produit', '+', 'produit']);
   $('menu').innerHTML = items.map(i => '<button data-act="onglet" data-v="' + i[0] + '" class="' + (S.ecran === i[0] ? 'actif' : '') + '"><b>' + i[1] + '</b>' + i[2] +
     (i[0] === 'ops' && n ? '<span class="badge">' + n + '</span>' : '') + '</button>').join('');
 }
+  function renderNouveauProduit(){
+  return `
+  <div class="carte">
+    <h2>➕ Nouveau produit</h2>
+    <div class="champ"><label>Code</label><input id="np-code" placeholder="SAVON01"></div>
+    <div class="champ"><label>Nom</label><input id="np-nom" placeholder="Savon bleu"></div>
+    <div class="champ"><label>Prix achat</label><input id="np-pa" type="number" placeholder="0"></div>
+    <div class="champ"><label>Prix vente</label><input id="np-pv" type="number" placeholder="0"></div>
+    <div class="champ"><label>Stock</label><input id="np-stock" type="number" value="0"></div>
+    <button class="btn" data-act="creer-produit">Enregistrer</button>
+    <div id="np-msg" style="margin-top:10px"></div>
+  </div>`;
+}
+function creerProduitLocal(){
+  const code = document.getElementById('np-code').value.trim().toUpperCase();
+  const nom = document.getElementById('np-nom').value.trim();
+  const pa = Number(document.getElementById('np-pa').value || 0);
+  const pv = Number(document.getElementById('np-pv').value || 0);
+  const stock = Number(document.getElementById('np-stock').value || 0);
+  const msg = document.getElementById('np-msg');
+  if(!code || !nom){ msg.innerHTML = '<div class="err">Code et Nom obligatoires</div>'; return; }
+  if((S.produits||[]).find(p=>p.code===code)){ msg.innerHTML = '<div class="err">Code existe déjà</div>'; return; }
+  const nouveau = {code:code, nom:nom, pa:pa, pv:pv, prix:pv, stock:stock};
+  S.produits = S.produits || []; S.produits.push(nouveau);
+  if(typeof ecrire === 'function'){ ecrire('produits', S.produits); }
+  localStorage.setItem('produits', JSON.stringify(S.produits));
+  msg.innerHTML = '<div class="ok">✅ '+code+' créé !</div>';
+  setTimeout(()=>{ S.ecran='stock'; render(); }, 800);
+}
 function renderEcran() {
   const e = S.ecran;
+    if (e === 'nouveau-produit') {
+    $('ecr').innerHTML = renderNouveauProduit();
+    return;
+}
   if (e === 'vente' || e === 'entree' || e === 'stock') {
     $('ecran').innerHTML = '<div class="recherche"><input id="q" type="search" placeholder="Chercher un produit (nom ou code)" autocomplete="off" value="' + esc(S.q) + '"></div><div class="liste" id="liste"></div>';
     renderListe();
