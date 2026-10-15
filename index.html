@@ -572,6 +572,7 @@ document.addEventListener('click', async ev => {
   const a = el.dataset.act, i = Number(el.dataset.i);
   const mode = S.ecran;
   if (a === 'onglet') { S.ecran = el.dataset.v; S.q = ''; render(); }
+    else if (a === "creer-produit"){ creerProduitLocal(); }
   else if (a === 'sync') synchroniser(true);
   else if (a === 'ajouter') ajouterAuPanier(el.dataset.code);
   else if (a === 'plus' || a === 'moins') {
