@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DIGINKA">
+<title>DIGINKA</title>
+<style>
+:root{--vert:#0b6e4f;--vert2:#e6f2ee;--rouge:#c0392b;--orange:#d98200;--gris:#6b7280;--bord:#e2e5e9;--fond:#f5f6f8;--txt:#1f2933}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fond);color:var(--txt);font-size:16px}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:720px;margin:0 auto;background:#fff;position:relative}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit}
+.barre{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;background:var(--vert);color:#fff}
+.titre{font-weight:700;font-size:18px;letter-spacing:.5px;display:flex;align-items:center}
+.mini{height:30px;width:30px;object-fit:contain;background:#fff;border-radius:8px;padding:2px;margin-right:9px}
+.logo{display:block;width:240px;max-width:80%;height:auto;margin:6px auto 4px}
+.chip{border:0;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.22)}
+.chip.ok{background:#1b8f68;color:#fff}.chip.warn{background:var(--orange);color:#fff}.chip.off{background:#7b2d26;color:#fff}
+.ban{padding:8px 14px;font-size:14px;background:#fff4e5;color:#8a5200;border-bottom:1px solid #f3d9a8}
+.ban.err{background:#fdecea;color:#8c241a;border-color:#f3b8b1}
+main{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+nav{display:flex;border-top:1px solid var(--bord);background:#fff;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;padding:8px 2px 6px;font-size:12px;color:var(--gris);position:relative}
+nav button b{display:block;font-size:20px;line-height:1.1;font-weight:400}
+nav button.actif{color:var(--vert);font-weight:700}
+.badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--orange);color:#fff;border-radius:999px;font-size:11px;min-width:18px;padding:1px 5px}
+.recherche{position:sticky;top:0;background:#fff;padding:10px 12px;border-bottom:1px solid var(--bord);z-index:2}
+.recherche input{width:100%;padding:12px 14px;border:1px solid var(--bord);border-radius:10px;font-size:16px;background:var(--fond)}
+.rech{display:flex;gap:8px}.rech input{flex:1;min-width:0;width:auto}
+.btnp{white-space:nowrap;border:1px solid var(--vert);background:#fff;color:var(--vert);border-radius:10px;padding:0 12px;font-weight:700}
+.liste{padding:6px 10px 14px}
+.prod{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;text-align:left;background:#fff;border:1px solid var(--bord);border-radius:12px;padding:10px 12px;margin:7px 0}
+.prod:active{background:var(--vert2)}
+.pn{font-weight:600}.pc{color:var(--gris);font-size:13px}
+.pp{font-weight:700;text-align:right}.ps{font-size:13px;text-align:right}
+.ok{color:#1b8f68}.faible{color:var(--orange)}.rupture{color:var(--rouge)}
+.dansPanier{border-color:var(--vert);background:var(--vert2)}
+.plus{color:var(--gris);text-align:center;font-size:13px;padding:8px}
+.vide{color:var(--gris);text-align:center;padding:30px 16px}
+#panier{display:none;border-top:2px solid var(--vert);background:#fff}
+#panier.visible{display:block}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 2px;font-size:14px}
+.ph button{border:0;background:none;color:var(--rouge);font-size:13px}
+.lignes{max-height:34vh;overflow:auto;padding:0 10px}
+.ligne{display:grid;grid-template-columns:1fr auto;gap:6px 8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bord)}
+.ln{font-weight:600;font-size:14px}.ln small{display:block;color:var(--gris);font-weight:400}
+.ctl{display:flex;align-items:center;gap:6px;grid-column:1 / 3}
+.ctl .q{display:flex;align-items:center;gap:4px}
+.ctl .q button{width:38px;height:38px;border-radius:10px;border:1px solid var(--bord);background:var(--fond);font-size:20px}
+.ctl input{width:78px;padding:8px;border:1px solid var(--bord);border-radius:8px;text-align:center;font-size:16px}
+.ctl .px{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gris)}
+.ctl .x{width:36px;height:36px;border:0;background:none;color:var(--rouge);font-size:18px}
+.gros{display:block;width:calc(100% - 20px);margin:8px 10px 10px;padding:15px;border:0;border-radius:12px;background:var(--vert);color:#fff;font-size:17px;font-weight:700}
+.gros:disabled{opacity:.5}
+.carte{margin:10px 12px;padding:12px 14px;border:1px solid var(--bord);border-radius:12px}
+.carte h3{margin:0 0 8px;font-size:15px;color:var(--gris);font-weight:600}
+.btn{display:block;width:100%;padding:13px;margin:8px 0;border:1px solid var(--vert);border-radius:10px;background:#fff;color:var(--vert);font-weight:600;font-size:15px}
+.btn.plein{background:var(--vert);color:#fff}
+.btn.danger{border-color:var(--rouge);color:var(--rouge)}
+.op{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;border-bottom:1px solid var(--bord)}
+.op small{color:var(--gris)}
+.tag{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:2px 7px;margin-left:6px}
+.tag.att{background:#fff0d6;color:#8a5200}.tag.env{background:#dff3ea;color:#116a4b}.tag.ref{background:#fdecea;color:#8c241a}.tag.neg{background:#fde8f3;color:#8a1f5c}
+.op .act{grid-column:1 / 3;text-align:right}
+.op .act button{border:0;background:none;color:var(--rouge);font-size:13px;padding:4px 0}
+.champ{display:block;margin:10px 0 4px;font-size:14px;color:var(--gris)}
+.champ+input,.champ+select{width:100%;padding:12px;border:1px solid var(--bord);border-radius:10px;font-size:16px}
+.connexion{padding:24px 18px}
+.connexion h1{margin:6px 0 4px;font-size:22px;color:var(--vert)}
+.connexion p{color:var(--gris);font-size:14px;margin:4px 0 12px}
+.erreur{color:var(--rouge);font-size:14px;margin:10px 0}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);max-width:88%;background:#222;color:#fff;padding:11px 16px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30;text-align:center}
+#toast.on{opacity:.96}#toast.err{background:var(--rouge)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+#modal.on{display:flex}
+.boite{background:#fff;width:100%;max-width:720px;border-radius:18px 18px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 16px);max-height:88dvh;overflow:auto}
+.boite h2{margin:0 0 8px;font-size:18px}
+.boite p{margin:6px 0 10px;color:#444}
+.rangee{display:flex;gap:10px}.rangee .btn{margin:6px 0}
+.user{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:10px 12px;border-bottom:1px solid var(--bord)}
+.user small{color:var(--gris)}
+.inactif{opacity:.55}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="barre" id="barre"></header>
+  <div id="banniere"></div>
+  <main id="ecran"></main>
+  <section id="panier"></section>
+  <nav id="menu"></nav>
+</div>
+<div id="toast"></div>
+<div id="modal"></div>
+
+<script>
+(() => {
+'use strict';
+
+const APP_NOM = 'DIGINKA';
+const VERSION = '1.2';
+
+/* ---------------------------------------------------------------- stockage local (IndexedDB, repli localStorage) */
+let dbp = null;
+function ouvrirDb() {
+  if (!dbp) dbp = new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error('pas de IndexedDB'));
+    const r = indexedDB.open('gestion-stock', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+  return dbp;
+}
+async function lire(cle, defaut) {
+  try {
+    const db = await ouvrirDb();
+    return await new Promise((res, rej) => {
+      const q = db.transaction('kv').objectStore('kv').get(cle);
+      q.onsuccess = () => res(q.result === undefined ? defaut : q.result);
+      q.onerror = () => rej(q.error);
+    });
+  } catch (e) {
+    try { const v = localStorage.getItem('gs_' + cle); return v === null ? defaut : JSON.parse(v); } catch (e2) { return defaut; }
+  }
+}
+async function ecrire(cle, val) {
+  try {
+    const db = await ouvrirDb();
+    await new Promise((res, rej) => {
+      const tx = db.transaction('kv', 'readwrite');
+      tx.objectStore('kv').put(val, cle);
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+      tx.onabort = () => rej(tx.error);
+    });
+  } catch (e) {
+    try { localStorage.setItem('gs_' + cle, JSON.stringify(val)); } catch (e2) { /* stockage plein */ }
+  }
+}
+
+/* ---------------------------------------------------------------- etat */
+const S = {
+  config: null,        // {url, code, nom, role, droits}
+  produits: [], index: new Map(),
+  ops: [],             // {id,type,t,code,qte,prix,statut:'attente'|'envoye'|'refuse',message,negatif}
+  paniers: {vente: [], entree: []},
+  appareil: '', ecart: 0, derniere: 0,
+  sync: {enCours: false, reseau: true, erreur: '', prochain: 0},
+  ecran: 'vente', q: '', utilisateurs: null, installPrompt: null, occupe: false
+};
+const DROITS_VENDEUR = {vendre: true, entrer: false, voirAchat: false, gererUtilisateurs: false, creerProduit: false};
+const droits = () => (S.config && S.config.droits) || DROITS_VENDEUR;
+
+/* ---------------------------------------------------------------- utilitaires */
+const $ = id => document.getElementById(id);
+const esc = s => String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const nb = n => (Number(n) || 0).toLocaleString('fr-FR', {maximumFractionDigits: 2});
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const heure = t => new Date(t).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+const dateHeure = t => new Date(t).toLocaleString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+function uuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+}
+function indexer() { S.index = new Map(S.produits.map(p => [p.code, p])); }
+const nomProduit = code => { const p = S.index.get(code); return p ? p.produit : code; };
+const enAttente = () => S.ops.filter(o => o.statut === 'attente');
+
+function pendMap() {
+  const m = {};
+  for (const o of S.ops) if (o.statut === 'attente' && (o.type === 'vente' || o.type === 'entree')) m[o.code] = (m[o.code] || 0) + (o.type === 'entree' ? o.qte : -o.qte);
+  return m;
+}
+function stockLocal(code, pm) {
+  const p = S.index.get(code);
+  return (p ? Number(p.stock) || 0 : 0) + ((pm || pendMap())[code] || 0);
+}
+
+let toastT = null;
+function toast(msg, err) {
+  const t = $('toast');
+  t.textContent = msg; t.className = 'on' + (err ? ' err' : '');
+  clearTimeout(toastT); toastT = setTimeout(() => { t.className = ''; }, err ? 4200 : 2600);
+}
+
+function modal(html, fixe) { const m = $('modal'); m.innerHTML = '<div class="boite">' + html + '</div>'; m.className = 'on'; m.dataset.fixe = fixe ? '1' : ''; }
+function fermerModal() { $('modal').className = ''; $('modal').innerHTML = ''; }
+function confirmer(titre, texte, oui, non) {
+  return new Promise(res => {
+    modal('<h2>' + esc(titre) + '</h2><p>' + texte + '</p><div class="rangee"><button class="btn" id="mNon">' + esc(non || 'Annuler') +
+      '</button><button class="btn plein" id="mOui">' + esc(oui || 'Confirmer') + '</button></div>');
+    $('mNon').onclick = () => { fermerModal(); res(false); };
+    $('mOui').onclick = () => { fermerModal(); res(true); };
+  });
+}
+
+/* ---------------------------------------------------------------- reseau : appels a la passerelle */
+async function appel(action, extra, cfg) {
+  cfg = cfg || S.config;
+  const ctrl = new AbortController();
+  const to = setTimeout(() => ctrl.abort(), 25000);
+  let rep;
+  try {
+    const r = await fetch(cfg.url, {
+      method: 'POST', redirect: 'follow', signal: ctrl.signal,
+      body: JSON.stringify(Object.assign({code: cfg.code, action: action, appareil: S.appareil}, extra || {}))
+    });
+    const txt = await r.text();
+    try { rep = JSON.parse(txt); } catch (e) { const er = new Error('La passerelle ne répond pas correctement.'); er.code = 'REPONSE_INVALIDE'; throw er; }
+  } catch (e) {
+    if (e.code) throw e;
+    const er = new Error('Pas de connexion'); er.code = 'RESEAU'; throw er;
+  } finally { clearTimeout(to); }
+  if (!rep.ok) { const er = new Error(rep.erreur || 'ERREUR'); er.code = rep.erreur || 'ERREUR'; er.detail = rep.detail; throw er; }
+  return rep;
+}
+function texteErreur(code) {
+  return ({
+    CODE_INVALIDE: 'Code d\'accès refusé (code incorrect ou utilisateur désactivé).',
+    REPONSE_INVALIDE: 'La passerelle ne répond pas correctement. Vérifiez le lien et le déploiement.',
+    RESEAU: 'Pas de connexion à la passerelle.',
+    DROIT_INSUFFISANT: 'Votre rôle ne permet pas cette action.',
+    NOM_MANQUANT: 'Le nom est obligatoire.', CODE_TROP_COURT: 'Le code doit avoir au moins 6 caractères.',
+    CODE_DEJA_UTILISE: 'Ce code est déjà utilisé par quelqu\'un d\'autre.', ROLE_INVALIDE: 'Rôle invalide.',
+    LISTE_PLEINE: 'La liste des utilisateurs est pleine.', AUTO_MODIFICATION_INTERDITE: 'Vous ne pouvez pas modifier votre propre rôle ni vous désactiver.',
+    UTILISATEUR_INTROUVABLE: 'Utilisateur introuvable.', ERREUR_SERVEUR: 'Erreur du serveur.'
+  })[code] || ('Erreur : ' + code);
+}
+
+function appliquerReponse(rep) {
+  for (const r of (rep.resultats || [])) {
+    const o = S.ops.find(x => x.id === r.id);
+    if (!o) continue;
+    if (r.statut === 'OK' || r.statut === 'DEJA_RECU') { o.statut = 'envoye'; }
+    else if (r.statut === 'OK_STOCK_NEGATIF') { o.statut = 'envoye'; o.negatif = true; }
+    else { o.statut = 'refuse'; o.message = r.message || 'Refusée'; }
+    if (r.message && o.statut === 'envoye') o.note = r.message;
+  }
+  if (Array.isArray(rep.produits)) { S.produits = rep.produits; indexer(); ajouterProduitsLocaux(); }
+  if (S.config && rep.role) { S.config.role = rep.role; S.config.droits = rep.droits || S.config.droits; S.config.nom = rep.nom || S.config.nom; }
+  if (rep.heureServeur) { const d = rep.heureServeur - Date.now(); S.ecart = Math.abs(d) > 120000 ? d : 0; }
+  S.derniere = Date.now();
+}
+async function sauverTout() {
+  await ecrire('ops', S.ops); await ecrire('produits', S.produits); await ecrire('config', S.config);
+  await ecrire('derniere', S.derniere); await ecrire('ecart', S.ecart);
+}
+
+async function synchroniser(manuel) {
+  if (!S.config || S.sync.enCours) return;
+  if (!navigator.onLine) { S.sync.reseau = false; render(); if (manuel) toast('Pas de connexion : vos opérations restent sur cet appareil.', true); return; }
+  S.sync.enCours = true; renderBarre();
+  try {
+    let tours = 0;
+    do {
+      const lot = enAttente().slice(0, 50);
+      const rep = lot.length
+        ? await appel('sync', {ops: lot.map(o => ({id: o.id, type: o.type, t: o.t, code: o.code, qte: o.qte, prix: o.prix, produit: o.produit, unite: o.unite, minimum: o.minimum, achat: o.achat, vente: o.vente}))})
+        : await appel('pull');
+      appliquerReponse(rep);
+      await sauverTout();
+      tours++;
+      if (!lot.length) break;
+    } while (enAttente().length && tours < 20);
+    S.sync.reseau = true; S.sync.erreur = ''; S.sync.prochain = 0;
+    if (manuel) toast(S.ops.some(o => o.statut === 'refuse') ? 'Synchronisé : certaines opérations sont refusées.' : 'Synchronisé.');
+  } catch (e) {
+    if (e.code === 'RESEAU') { S.sync.reseau = false; S.sync.prochain = Date.now() + 60000; if (manuel) toast('Pas de connexion : vos opérations restent sur cet appareil.', true); }
+    else { S.sync.reseau = true; S.sync.erreur = texteErreur(e.code); S.sync.prochain = Date.now() + 120000; if (manuel) toast(S.sync.erreur, true); }
+  } finally {
+    S.sync.enCours = false;
+    if (!droits().entrer && S.ecran === 'entree') S.ecran = 'vente';
+    render();
+  }
+}
+const lancerSync = () => { synchroniser(false); };
+
+function tic() {
+  if (!S.config || S.sync.enCours || document.visibilityState !== 'visible') return;
+  if (Date.now() < S.sync.prochain) return;
+  if (enAttente().length || Date.now() - S.derniere > 5 * 60000) synchroniser(false);
+}
+
+/* ---------------------------------------------------------------- liste des produits */
+function frequences() {
+  const f = {}, limite = Date.now() - 30 * 86400000;
+  for (const o of S.ops) if (o.type === 'vente' && o.t > limite) f[o.code] = (f[o.code] || 0) + 1;
+  return f;
+}
+function produitsFiltres() {
+  const n = norm(S.q);
+  let l = S.produits;
+  if (n) l = l.filter(p => norm(p.code + ' ' + p.produit).includes(n)).sort((a, b) => norm(a.produit).localeCompare(norm(b.produit)));
+  else { const f = frequences(); l = l.slice().sort((a, b) => (f[b.code] || 0) - (f[a.code] || 0) || norm(a.produit).localeCompare(norm(b.produit))); }
+  return l;
+}
+function classeStock(p, st) {
+  if (st <= 0) return 'rupture';
+  if (typeof p.minimum === 'number' && st <= p.minimum) return 'faible';
+  return 'ok';
+}
+
+/* ---------------------------------------------------------------- rendu */
+function render() {
+  if (!S.config) { renderConnexion(); return; }
+  renderBarre(); renderBanniere(); renderMenu(); renderEcran(); renderPanier();
+}
+function renderConnexion() {
+  $('barre').innerHTML = '<div class="titre"><img class="mini" src="logo-mini.png" alt="">' + esc(APP_NOM) + '</div>';
+  $('banniere').innerHTML = ''; $('menu').innerHTML = ''; $('panier').className = ''; $('panier').innerHTML = '';
+  const u = new URLSearchParams(location.search).get('u') || '';
+  $('ecran').innerHTML = '<div class="connexion"><img class="logo" src="logo.png" alt="DIGINKA"><h1>Connexion</h1><p>Entrez le lien de la passerelle (donné par l\'administrateur) et votre code d\'accès. Cette étape demande internet une seule fois.</p>' +
+    '<label class="champ" for="cUrl">Lien de la passerelle</label><input id="cUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec" value="' + esc(S.urlSaisie || u) + '">' +
+    '<label class="champ" for="cCode">Code d\'accès</label><input id="cCode" type="password" autocomplete="off" placeholder="Votre code personnel">' +
+    '<div class="erreur" id="cErr">' + esc(S.erreurConnexion || '') + '</div>' +
+    '<button class="btn plein" data-act="connexion" id="cBtn">Se connecter</button></div>';
+}
+function renderBarre() {
+  const n = enAttente().length;
+  let cls = 'ok', txt;
+  if (S.sync.enCours) { cls = 'warn'; txt = 'Synchronisation…'; }
+  else if (!S.sync.reseau || !navigator.onLine) { cls = 'off'; txt = 'Hors ligne' + (n ? ' · ' + n + ' en attente' : ''); }
+  else if (n) { cls = 'warn'; txt = n + ' à envoyer'; }
+  else { txt = S.derniere ? 'À jour · ' + heure(S.derniere) : 'Pas encore synchronisé'; }
+  $('barre').innerHTML = '<div class="titre"><img class="mini" src="logo-mini.png" alt="">' + esc(APP_NOM) + '</div><button class="chip ' + cls + '" data-act="sync">' + esc(txt) + '</button>';
+}
+function renderBanniere() {
+  let h = '';
+  if (S.sync.erreur) h += '<div class="ban err">' + esc(S.sync.erreur) + '</div>';
+  if (Math.abs(S.ecart) > 5 * 60000) h += '<div class="ban">L\'heure de ce téléphone semble décalée. L\'heure des opérations est corrigée automatiquement, mais vérifiez l\'heure de l\'appareil.</div>';
+  const ref = S.ops.filter(o => o.statut === 'refuse').length;
+  if (ref) h += '<div class="ban err">' + ref + ' opération(s) refusée(s) : voir l\'onglet Opérations.</div>';
+  $('banniere').innerHTML = h;
+}
+function renderMenu() {
+  const d = droits(), n = enAttente().length;
+  const items = [['vente', '🛒', 'Vente']];
+  if (d.entrer) items.push(['entree', '📥', 'Entrée']);
+  items.push(['stock', '📦', 'Stock'], ['ops', '🧾', 'Opérations'], ['plus', '⚙️', 'Plus']);
+  $('menu').innerHTML = items.map(i => '<button data-act="onglet" data-v="' + i[0] + '" class="' + (S.ecran === i[0] ? 'actif' : '') + '"><b>' + i[1] + '</b>' + i[2] +
+    (i[0] === 'ops' && n ? '<span class="badge">' + n + '</span>' : '') + '</button>').join('');
+}
+function renderEcran() {
+  const e = S.ecran;
+  if (e === 'vente' || e === 'entree' || e === 'stock') {
+    const btnP = (droits().creerProduit && (e === 'entree' || e === 'stock')) ? '<button class="btnp" data-act="nouveauProduit">＋ Produit</button>' : '';
+    $('ecran').innerHTML = '<div class="recherche"><div class="rech"><input id="q" type="search" placeholder="Chercher un produit (nom ou code)" autocomplete="off" value="' + esc(S.q) + '">' + btnP + '</div></div><div class="liste" id="liste"></div>';
+    renderListe();
+  } else if (e === 'ops') renderOps();
+  else if (e === 'users') renderUsers();
+  else renderPlus();
+}
+function renderListe() {
+  const el = $('liste'); if (!el) return;
+  const mode = S.ecran, pm = pendMap();
+  if (!S.produits.length) { el.innerHTML = '<div class="vide">Aucun produit pour le moment.<br>Touchez « Hors ligne / À jour » en haut pour synchroniser.</div>'; return; }
+  const tous = produitsFiltres(), l = tous.slice(0, 80);
+  if (!l.length) { el.innerHTML = '<div class="vide">Aucun produit ne correspond.</div>'; return; }
+  const panier = mode === 'stock' ? [] : S.paniers[mode];
+  const ach = droits().voirAchat;
+  el.innerHTML = l.map(p => {
+    const st = stockLocal(p.code, pm), cl = classeStock(p, st);
+    const dans = panier.find(x => x.code === p.code);
+    const delta = pm[p.code] || 0;
+    if (mode === 'stock') {
+      return '<div class="prod"><span class="pn">' + esc(p.produit) + '</span><span class="pp">' + nb(st) + ' <small>' + esc(p.unite || '') + '</small></span>' +
+        '<span class="pc">' + esc(p.code) + (typeof p.minimum === 'number' ? ' · min ' + nb(p.minimum) : '') + (delta ? ' · ' + (delta > 0 ? '+' : '') + nb(delta) + ' non envoyé' : '') + '</span>' +
+        '<span class="ps ' + cl + '">' + (cl === 'rupture' ? 'RUPTURE' : cl === 'faible' ? 'STOCK FAIBLE' : 'Prix ' + nb(p.vente) + (ach && p.achat ? ' · achat ' + nb(p.achat) : '')) + '</span></div>';
+    }
+    return '<button class="prod' + (dans ? ' dansPanier' : '') + '" data-act="ajouter" data-code="' + esc(p.code) + '"><span class="pn">' + esc(p.produit) + (dans ? ' ×' + nb(dans.qte) : '') + '</span>' +
+      '<span class="pp">' + (mode === 'vente' ? (p.vente ? nb(p.vente) : 'Prix ?') : (p.achat ? nb(p.achat) : 'Prix ?')) + '</span><span class="pc">' + esc(p.code) + ' · ' + esc(p.unite || '') + '</span>' +
+      '<span class="ps ' + cl + '">Stock ' + nb(st) + '</span></button>';
+  }).join('') + (tous.length > 80 ? '<div class="plus">… ' + (tous.length - 80) + ' autres produits : précisez la recherche.</div>' : '');
+}
+function renderPanier() {
+  const el = $('panier'), mode = S.ecran;
+  if (mode !== 'vente' && mode !== 'entree') { el.className = ''; el.innerHTML = ''; return; }
+  const lignes = S.paniers[mode];
+  if (!lignes.length) { el.className = ''; el.innerHTML = ''; return; }
+  const pm = pendMap();
+  el.className = 'visible';
+  el.innerHTML = '<div class="ph"><b>' + (mode === 'vente' ? 'Vente en cours' : 'Entrée en cours') + ' · <span id="ptotal"></span></b><button data-act="vider">Vider</button></div>' +
+    '<div class="lignes">' + lignes.map((l, i) => {
+      const p = S.index.get(l.code), st = stockLocal(l.code, pm);
+      return '<div class="ligne" data-i="' + i + '"><div class="ln">' + esc(p ? p.produit : l.code) + '<small>' + esc(l.code) + ' · stock ' + nb(st) + '</small></div>' +
+        '<div class="ctl"><div class="q"><button data-act="moins" data-i="' + i + '">−</button><input type="number" inputmode="decimal" step="any" min="0" data-champ="qte" data-i="' + i + '" value="' + esc(l.qte) + '"><button data-act="plus" data-i="' + i + '">+</button></div>' +
+        '<div class="px">' + (mode === 'vente' ? 'Prix' : 'Achat') + '<input type="number" inputmode="decimal" step="any" min="0" data-champ="prix" data-i="' + i + '" value="' + esc(l.prix) + '"></div>' +
+        '<button class="x" data-act="retirer" data-i="' + i + '" aria-label="Retirer">✕</button></div></div>';
+    }).join('') + '</div><button class="gros" id="valider" data-act="valider">' + (mode === 'vente' ? 'ENREGISTRER LA VENTE' : 'ENREGISTRER L\'ENTRÉE') + '</button>';
+  majTotal();
+}
+function majTotal() {
+  const t = $('ptotal'); if (!t) return;
+  const lignes = S.paniers[S.ecran] || [];
+  t.textContent = nb(lignes.reduce((s, l) => s + (Number(l.qte) || 0) * (Number(l.prix) || 0), 0));
+}
+function renderOps() {
+  const l = S.ops.slice().sort((a, b) => b.t - a.t).slice(0, 150);
+  const n = enAttente().length;
+  let h = '<div class="carte"><b>' + n + ' opération(s) en attente d\'envoi</b><br><small>Elles sont gardées sur cet appareil jusqu\'à la synchronisation.</small></div>';
+  if (!l.length) h += '<div class="vide">Aucune opération.</div>';
+  h += l.map(o => {
+    const tag = o.statut === 'attente' ? '<span class="tag att">En attente</span>' : o.statut === 'refuse' ? '<span class="tag ref">Refusée</span>' : '<span class="tag env">Envoyée</span>';
+    const neg = o.negatif ? '<span class="tag neg">Stock négatif</span>' : '';
+    return '<div class="op"><div><b>' + (o.type === 'vente' ? 'Vente' : o.type === 'produit' ? 'Nouveau produit' : 'Entrée') + '</b> · ' + esc(o.type === 'produit' ? o.produit : nomProduit(o.code)) + tag + neg + '</div><div style="text-align:right"><b>' + (o.type === 'produit' ? 'Prix ' + nb(o.vente) : nb(o.qte) + ' × ' + nb(o.prix)) + '</b></div>' +
+      '<small>' + dateHeure(o.t) + ' · ' + esc(o.code) + (o.message ? ' · ' + esc(o.message) : '') + '</small><small style="text-align:right">' + (o.type === 'produit' ? '' : nb(o.qte * o.prix)) + '</small>' +
+      (o.statut === 'attente' ? '<div class="act"><button data-act="annuler" data-id="' + esc(o.id) + '">Annuler cette opération</button></div>' : '') +
+      (o.statut === 'refuse' ? '<div class="act"><button data-act="supprimer" data-id="' + esc(o.id) + '">Retirer de la liste</button></div>' : '') + '</div>';
+  }).join('');
+  $('ecran').innerHTML = h;
+}
+function renderPlus() {
+  const c = S.config, d = droits();
+  const role = {administrateur: 'Administrateur', responsable: 'Responsable', vendeur: 'Vendeur'}[c.role] || c.role;
+  let h = '<div class="carte"><h3>Compte</h3><b>' + esc(c.nom || '') + '</b> · ' + esc(role) + '<br><small>Dernière synchronisation : ' + (S.derniere ? dateHeure(S.derniere) : 'jamais') + '</small></div>' +
+    '<div class="carte"><button class="btn plein" data-act="sync">Synchroniser maintenant</button>';
+  if (d.gererUtilisateurs) h += '<button class="btn" data-act="onglet" data-v="users">Gérer les utilisateurs</button>';
+  h += '<button class="btn" data-act="sauvegarde">Sauvegarder les opérations (fichier)</button>';
+  if (S.installPrompt) h += '<button class="btn" data-act="installer">Installer l\'application</button>';
+  h += '<button class="btn danger" data-act="deconnexion">Se déconnecter</button></div>' +
+    '<div class="carte"><small>' + esc(APP_NOM) + ' · version ' + VERSION + ' · appareil ' + esc(S.appareil) + '</small></div>';
+  $('ecran').innerHTML = h;
+}
+async function renderUsers() {
+  $('ecran').innerHTML = '<div class="carte"><button class="btn" data-act="onglet" data-v="plus">← Retour</button><button class="btn plein" data-act="userAjouter">+ Ajouter une personne</button></div><div id="uListe" class="vide">Chargement…</div>';
+  try {
+    const rep = await appel('utilisateurs', {sousAction: 'lister'});
+    S.utilisateurs = rep.utilisateurs;
+    afficherUsers();
+  } catch (e) {
+    if ($('uListe')) $('uListe').innerHTML = esc(e.code === 'RESEAU' ? 'Cette page demande une connexion internet.' : texteErreur(e.code));
+  }
+}
+function afficherUsers() {
+  const el = $('uListe'); if (!el) return;
+  el.className = '';
+  const nomRole = {administrateur: 'Administrateur', responsable: 'Responsable', vendeur: 'Vendeur'};
+  el.innerHTML = (S.utilisateurs || []).map(u => '<div class="user' + (u.actif ? '' : ' inactif') + '"><div><b>' + esc(u.nom) + '</b><br><small>' + esc(nomRole[u.role] || u.role) +
+    ' · code protégé' + (u.actif ? '' : ' · désactivé') + '</small></div><button class="btn" style="width:auto;margin:0" data-act="userModifier" data-id="' + u.id + '">Modifier</button></div>').join('') || '<div class="vide">Aucun utilisateur.</div>';
+}
+
+/* ---------------------------------------------------------------- actions */
+function ajouterAuPanier(code) {
+  const mode = S.ecran, p = S.index.get(code); if (!p) return;
+  const l = S.paniers[mode].find(x => x.code === code);
+  if (l) l.qte = (Number(l.qte) || 0) + 1;
+  else S.paniers[mode].push({code: code, qte: 1, prix: (mode === 'vente' ? p.vente : p.achat) || ''});
+  ecrire('paniers', S.paniers);
+  renderListe(); renderPanier();
+}
+async function valider() {
+  const mode = S.ecran, lignes = S.paniers[mode];
+  if (S.occupe || !lignes.length) return;
+  for (const l of lignes) {
+    if (!(Number(l.qte) > 0)) return toast('Quantité invalide pour ' + nomProduit(l.code), true);
+    if (!(Number(l.prix) > 0)) return toast((mode === 'vente' ? 'Prix manquant pour ' : 'Prix d\'achat manquant pour ') + nomProduit(l.code), true);
+  }
+  S.occupe = true;
+  try {
+    const pm = pendMap();
+    const manque = mode === 'vente' ? lignes.filter(l => Number(l.qte) > stockLocal(l.code, pm)) : [];
+    if (manque.length) {
+      const txt = manque.map(l => '• <b>' + esc(nomProduit(l.code)) + '</b> : demandé ' + nb(l.qte) + ', disponible ' + nb(stockLocal(l.code, pm))).join('<br>') +
+        '<br><br>Le stock affiché est celui de la dernière synchronisation. Enregistrer quand même ? Le patron sera prévenu.';
+      if (!(await confirmer('Stock insuffisant', txt, 'Enregistrer quand même'))) return;
+    }
+    const t = Date.now() + S.ecart;
+    lignes.forEach((l, i) => S.ops.push({id: uuid(), type: mode, t: t + i, code: l.code, qte: Number(l.qte), prix: Number(l.prix), statut: 'attente', message: '',
+      negatif: manque.some(m => m.code === l.code)}));
+    S.paniers[mode] = [];
+    await ecrire('ops', S.ops); await ecrire('paniers', S.paniers);   // d'abord sur l'appareil
+    S.q = '';
+    toast((mode === 'vente' ? 'Vente enregistrée' : 'Entrée enregistrée') + (S.sync.reseau && navigator.onLine ? '' : ' · sera envoyée dès la connexion'));
+    render();
+    lancerSync();
+  } finally { S.occupe = false; }
+}
+async function connexion() {
+  const url = $('cUrl').value.trim(), code = $('cCode').value.trim();
+  S.urlSaisie = url;
+  const err = m => { S.erreurConnexion = m; $('cErr').textContent = m; $('cBtn').disabled = false; };
+  if (!/^https:\/\//i.test(url) && !/^http:\/\/(localhost|127\.0\.0\.1)/i.test(url)) return err('Le lien doit commencer par https://');
+  if (code.length < 4) return err('Entrez votre code d\'accès.');
+  $('cBtn').disabled = true; $('cErr').textContent = 'Connexion…';
+  try {
+    if (!S.appareil) { S.appareil = 'App-' + Math.random().toString(36).slice(2, 6).toUpperCase(); await ecrire('appareil', S.appareil); }
+    const cfg = {url: url, code: code, nom: '', role: 'vendeur', droits: DROITS_VENDEUR};
+    const rep = await appel('pull', {}, cfg);
+    cfg.nom = rep.nom; cfg.role = rep.role; cfg.droits = rep.droits;
+    S.config = cfg; S.produits = rep.produits || []; indexer(); S.ops = []; S.paniers = {vente: [], entree: []};
+    S.derniere = Date.now(); S.ecran = 'vente'; S.erreurConnexion = '';
+    await sauverTout(); await ecrire('paniers', S.paniers);
+    render();
+  } catch (e) { err(e.code === 'RESEAU' ? 'Impossible de joindre la passerelle. Vérifiez le lien et votre connexion.' : texteErreur(e.code)); }
+}
+async function deconnexion() {
+  const n = enAttente().length;
+  const ok = n
+    ? await confirmer('Opérations non envoyées', n + ' opération(s) n\'ont pas été envoyées et seront <b>perdues</b>. Synchronisez d\'abord, ou faites une sauvegarde.', 'Déconnecter et supprimer')
+    : await confirmer('Se déconnecter ?', 'Vous devrez entrer le lien et votre code à la prochaine connexion.', 'Se déconnecter');
+  if (!ok) return;
+  S.config = null; S.ops = []; S.produits = []; indexer(); S.paniers = {vente: [], entree: []}; S.derniere = 0; S.q = '';
+  await ecrire('config', null); await ecrire('ops', []); await ecrire('produits', []); await ecrire('paniers', S.paniers); await ecrire('derniere', 0);
+  render();
+}
+function sauvegarde() {
+  const blob = new Blob([JSON.stringify({appareil: S.appareil, date: new Date().toISOString(), ops: S.ops}, null, 1)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'sauvegarde-operations-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+function genererCode() {
+  const A = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  const b = new Uint32Array(8); crypto.getRandomValues(b);
+  return Array.from(b, x => A[x % A.length]).join('');
+}
+function afficherCodeUnique(nom, code) {
+  modal('<h2>Code d\'accès de ' + esc(nom) + '</h2><p id="codeUnique" style="font-size:26px;letter-spacing:2px;text-align:center;font-weight:700;background:#f5f6f8;border-radius:10px;padding:12px;user-select:all">' + esc(code) +
+    '</p><p>Notez ce code et transmettez-le à la personne. <b>Il ne pourra plus être affiché</b> : il est enregistré sous forme protégée.</p><button class="btn plein" id="cOk">J\'ai noté le code</button>', true);
+  $('cOk').onclick = fermerModal;
+}
+function formUser(u) {
+  const roles = [['vendeur', 'Vendeur'], ['responsable', 'Responsable'], ['administrateur', 'Administrateur']];
+  modal('<h2>' + (u ? 'Modifier ' + esc(u.nom) : 'Ajouter une personne') + '</h2>' +
+    (u ? '' : '<label class="champ" for="fNom">Nom</label><input id="fNom" autocomplete="off">') +
+    '<label class="champ" for="fCode">' + (u ? 'Nouveau code (laisser vide pour ne pas changer)' : 'Code d\'accès (6 caractères ou plus)') + '</label><input id="fCode" autocomplete="off"><button class="btn" id="fGen" type="button" style="margin-top:6px">Générer un code</button>' +
+    '<label class="champ" for="fRole">Rôle</label><select id="fRole">' + roles.map(r => '<option value="' + r[0] + '"' + (u && u.role === r[0] ? ' selected' : '') + '>' + r[1] + '</option>').join('') + '</select>' +
+    (u ? '<label class="champ" for="fActif">Statut</label><select id="fActif"><option value="oui"' + (u.actif ? ' selected' : '') + '>Actif</option><option value="non"' + (u.actif ? '' : ' selected') + '>Désactivé</option></select>' : '') +
+    '<div class="erreur" id="fErr"></div><div class="rangee"><button class="btn" id="fNon">Annuler</button><button class="btn plein" id="fOui">Enregistrer</button></div>');
+  $('fNon').onclick = fermerModal;
+  $('fGen').onclick = () => { $('fCode').value = genererCode(); };
+  $('fOui').onclick = async () => {
+    $('fOui').disabled = true;
+    try {
+      const code = $('fCode').value.trim(), role = $('fRole').value;
+      const rep = u
+        ? await appel('utilisateurs', Object.assign({sousAction: 'modifier', id: u.id, role: role, actif: $('fActif').value}, code ? {nouveauCode: code} : {}))
+        : await appel('utilisateurs', {sousAction: 'ajouter', nom: $('fNom').value.trim(), nouveauCode: code, nouveauRole: role});
+      const nomCible = u ? u.nom : $('fNom').value.trim();
+      S.utilisateurs = rep.utilisateurs; fermerModal(); afficherUsers();
+      if (code) afficherCodeUnique(nomCible, code); else toast('Enregistré.');
+    } catch (e) { $('fErr').textContent = e.code === 'RESEAU' ? 'Pas de connexion.' : texteErreur(e.code); $('fOui').disabled = false; }
+  };
+}
+
+/* ---------------------------------------------------------------- nouveau produit (cree hors ligne, ajoute au Sheet a la synchro) */
+const CODE_OK = /^[A-Za-z0-9][A-Za-z0-9._\/-]{0,19}$/;
+function ajouterProduitsLocaux() {
+  for (const o of S.ops) {
+    if (o.type === 'produit' && o.statut === 'attente' && !S.index.has(o.code)) {
+      S.produits.push({code: o.code, produit: o.produit, unite: o.unite, stock: 0, minimum: o.minimum, vente: o.vente, achat: o.achat, local: true});
+    }
+  }
+  indexer();
+}
+function suggererCode() {
+  const pref = {};
+  for (const p of S.produits) {
+    const m = /^(.*?)(\d+)$/.exec(p.code); if (!m) continue;
+    const k = m[1], e = pref[k] || (pref[k] = {n: 0, max: 0, long: 0});
+    e.n++; e.max = Math.max(e.max, Number(m[2])); e.long = Math.max(e.long, m[2].length);
+  }
+  const ks = Object.keys(pref).sort((a, b) => pref[b].n - pref[a].n);
+  if (!ks.length) return 'P001';
+  const k = ks[0];
+  return k + String(pref[k].max + 1).padStart(pref[k].long, '0');
+}
+function formProduit() {
+  const unites = Array.from(new Set(S.produits.map(p => p.unite).filter(Boolean)));
+  const nombre = (id, lbl, val, ph) => '<label class="champ" for="' + id + '">' + lbl + '</label><input id="' + id + '" type="number" inputmode="decimal" step="any" min="0"' +
+    (val !== undefined ? ' value="' + val + '"' : '') + (ph ? ' placeholder="' + ph + '"' : '') + '>';
+  modal('<h2>Nouveau produit</h2>' +
+    '<label class="champ" for="nCode">Code (sans espace)</label><input id="nCode" autocomplete="off" autocapitalize="characters" value="' + esc(suggererCode()) + '">' +
+    '<label class="champ" for="nNom">Nom du produit</label><input id="nNom" autocomplete="off">' +
+    '<label class="champ" for="nUnite">Unité</label><input id="nUnite" list="nUnites" autocomplete="off" value="' + esc(unites[0] || 'pièce') + '"><datalist id="nUnites">' + unites.map(u => '<option value="' + esc(u) + '">').join('') + '</datalist>' +
+    nombre('nVente', 'Prix de vente') + nombre('nAchat', 'Prix d\'achat') + nombre('nMin', 'Stock minimum (alerte)', 0) +
+    nombre('nQte', 'Quantité reçue maintenant (facultatif)', undefined, '0') +
+    '<p><small>Si vous indiquez une quantité, une entrée est enregistrée avec ce prix d\'achat. Le produit est ajouté au Google Sheets à la prochaine synchronisation.</small></p>' +
+    '<div class="erreur" id="nErr"></div><div class="rangee"><button class="btn" id="nNon">Annuler</button><button class="btn plein" id="nOui">Créer le produit</button></div>');
+  $('nNon').onclick = fermerModal;
+  $('nOui').onclick = async () => {
+    const code = $('nCode').value.trim(), nom = $('nNom').value.trim(), unite = $('nUnite').value.trim();
+    const vente = Number($('nVente').value), achat = Number($('nAchat').value || 0), mini = Number($('nMin').value || 0), qte = Number($('nQte').value || 0);
+    const err = m => { $('nErr').textContent = m; };
+    if (!CODE_OK.test(code)) return err('Code invalide : 1 à 20 caractères (lettres, chiffres, . _ / -), sans espace.');
+    if (S.produits.some(p => String(p.code).toLowerCase() === code.toLowerCase())) return err('Ce code existe déjà.');
+    if (!nom || nom.length > 80) return err('Entrez le nom du produit (80 caractères au plus).');
+    if (!unite || unite.length > 20) return err('Entrez l\'unité (20 caractères au plus).');
+    if (/^[=+\-@]/.test(nom) || /^[=+\-@]/.test(unite)) return err('Le nom et l\'unité ne peuvent pas commencer par = + - ou @.');
+    if (!(vente > 0)) return err('Entrez le prix de vente.');
+    if (!(achat >= 0) || !(mini >= 0) || !(qte >= 0)) return err('Valeurs invalides.');
+    if (qte > 0 && !(achat > 0)) return err('Pour enregistrer une quantité, entrez aussi le prix d\'achat.');
+    $('nOui').disabled = true;
+    const t = Date.now() + S.ecart;
+    S.ops.push({id: uuid(), type: 'produit', t: t, code: code, produit: nom, unite: unite, minimum: mini, achat: achat, vente: vente, statut: 'attente', message: ''});
+    if (qte > 0) S.ops.push({id: uuid(), type: 'entree', t: t + 1, code: code, qte: qte, prix: achat, statut: 'attente', message: ''});
+    S.produits.push({code: code, produit: nom, unite: unite, stock: 0, minimum: mini, vente: vente, achat: achat, local: true});
+    indexer();
+    await ecrire('ops', S.ops); await ecrire('produits', S.produits);   // d'abord sur l'appareil
+    fermerModal();
+    toast('Produit créé' + (S.sync.reseau && navigator.onLine ? '' : ' · sera ajouté au Sheet dès la connexion'));
+    render(); lancerSync();
+  };
+}
+
+/* ---------------------------------------------------------------- evenements */
+document.addEventListener('click', async ev => {
+  const el = ev.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, i = Number(el.dataset.i);
+  const mode = S.ecran;
+  if (a === 'onglet') { S.ecran = el.dataset.v; S.q = ''; render(); }
+  else if (a === 'sync') synchroniser(true);
+  else if (a === 'ajouter') ajouterAuPanier(el.dataset.code);
+  else if (a === 'plus' || a === 'moins') {
+    const l = S.paniers[mode][i]; if (!l) return;
+    l.qte = Math.max(0, (Number(l.qte) || 0) + (a === 'plus' ? 1 : -1));
+    ecrire('paniers', S.paniers); renderListe(); renderPanier();
+  }
+  else if (a === 'retirer') { S.paniers[mode].splice(i, 1); ecrire('paniers', S.paniers); renderListe(); renderPanier(); }
+  else if (a === 'vider') { S.paniers[mode] = []; ecrire('paniers', S.paniers); renderListe(); renderPanier(); }
+  else if (a === 'valider') valider();
+  else if (a === 'annuler') {
+    const cible = S.ops.find(o => o.id === el.dataset.id);
+    if (cible && cible.type === 'produit' && S.ops.some(o => o.id !== cible.id && o.code === cible.code && o.statut === 'attente')) {
+      toast('Annulez d\'abord les entrées et ventes de ce produit.', true); return;
+    }
+    if (await confirmer('Annuler l\'opération ?', 'Elle ne sera pas envoyée et le stock affiché sera corrigé.', 'Annuler l\'opération', 'Garder')) {
+      S.ops = S.ops.filter(o => o.id !== el.dataset.id);
+      if (cible && cible.type === 'produit') { S.produits = S.produits.filter(p => !(p.local && p.code === cible.code)); indexer(); await ecrire('produits', S.produits); }
+      await ecrire('ops', S.ops); render();
+    }
+  }
+  else if (a === 'supprimer') { S.ops = S.ops.filter(o => o.id !== el.dataset.id); await ecrire('ops', S.ops); render(); }
+  else if (a === 'connexion') connexion();
+  else if (a === 'deconnexion') deconnexion();
+  else if (a === 'sauvegarde') sauvegarde();
+  else if (a === 'installer' && S.installPrompt) { S.installPrompt.prompt(); S.installPrompt = null; render(); }
+  else if (a === 'nouveauProduit') formProduit();
+  else if (a === 'userAjouter') formUser(null);
+  else if (a === 'userModifier') formUser((S.utilisateurs || []).find(u => u.id === Number(el.dataset.id)));
+});
+document.addEventListener('input', ev => {
+  const t = ev.target;
+  if (t.id === 'q') { S.q = t.value; renderListe(); return; }
+  if (t.dataset && t.dataset.champ) {
+    const l = (S.paniers[S.ecran] || [])[Number(t.dataset.i)]; if (!l) return;
+    l[t.dataset.champ] = t.value === '' ? '' : Number(t.value);
+    majTotal();
+  }
+});
+document.addEventListener('change', ev => {
+  if (ev.target.dataset && ev.target.dataset.champ) { ecrire('paniers', S.paniers); renderListe(); }
+});
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter' && ev.target.id === 'cCode') connexion();
+});
+window.addEventListener('online', () => { S.sync.prochain = 0; lancerSync(); });
+window.addEventListener('offline', () => { S.sync.reseau = false; if (S.config) renderBarre(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tic(); });
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); S.installPrompt = e; });
+$('modal').addEventListener('click', e => { if (e.target.id === 'modal' && !e.target.dataset.fixe) fermerModal(); });
+
+/* ---------------------------------------------------------------- demarrage */
+async function init() {
+  S.config = await lire('config', null);
+  S.produits = await lire('produits', []);
+  S.ops = await lire('ops', []);
+  S.paniers = await lire('paniers', {vente: [], entree: []});
+  S.appareil = await lire('appareil', '');
+  S.derniere = await lire('derniere', 0);
+  S.ecart = await lire('ecart', 0);
+  const limite = Date.now() - 14 * 86400000;
+  S.ops = S.ops.filter(o => o.statut === 'attente' || o.t > limite);   // on ne purge jamais une opération non envoyée
+  indexer(); ajouterProduitsLocaux();
+  if (!navigator.onLine) S.sync.reseau = false;
+  render();
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  setInterval(tic, 30000);
+  if (S.config) lancerSync();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+init();
+})();
+</script>
+</body>
+</html>
