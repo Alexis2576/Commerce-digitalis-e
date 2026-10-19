@@ -1,6 +1,6 @@
 // Service worker : garde l'application en memoire pour qu'elle s'ouvre sans connexion.
 // Les appels a la passerelle Google ne passent jamais par ici (autre domaine).
-const CACHE = 'diginka-v4';
+const CACHE = 'diginka-v5';
 const FICHIERS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './logo.png', './logo-mini.png'];
 
 self.addEventListener('install', e => {

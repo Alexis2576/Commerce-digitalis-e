@@ -419,6 +419,29 @@ function renderOps() {
   }).join('');
   $('ecran').innerHTML = h;
 }
+function lienValide(u) { return /^https:\/\//i.test(u) || /^http:\/\/(localhost|127\.0\.0\.1)/i.test(u); }
+function changerLien(propose) {
+  const courant = S.config ? S.config.url : '';
+  modal('<h2>Changer le lien de la passerelle</h2><p>Vos opérations en attente sont conservées. Collez le nouveau lien (il se termine par /exec). Il sera testé avant d\'être enregistré.</p>' +
+    '<label class="champ" for="lUrl">Nouveau lien</label><input id="lUrl" type="url" inputmode="url" autocomplete="off" value="' + esc(propose || courant) + '">' +
+    '<div class="erreur" id="lErr"></div><div class="rangee"><button class="btn" id="lNon">Annuler</button><button class="btn plein" id="lOui">Tester et enregistrer</button></div>');
+  $('lNon').onclick = fermerModal;
+  $('lOui').onclick = async () => {
+    const url = $('lUrl').value.trim();
+    if (!lienValide(url)) { $('lErr').textContent = 'Le lien doit commencer par https://'; return; }
+    $('lOui').disabled = true; $('lErr').textContent = 'Test en cours…';
+    try {
+      const rep = await appel('pull', {}, {url: url, code: S.config.code});
+      S.config.url = url; appliquerReponse(rep);
+      S.passerelle = null; S.sync.erreur = ''; S.sync.reseau = true; S.sync.prochain = 0;
+      await sauverTout(); fermerModal(); render(); toast('Passerelle mise à jour.');
+    } catch (e) {
+      $('lErr').textContent = e.code === 'RESEAU' ? 'Impossible de joindre ce lien. Vérifiez-le et votre connexion.'
+        : (e.code === 'CODE_INVALIDE' ? 'Ce lien répond, mais votre code d\'accès n\'y est pas reconnu. Déconnectez-vous puis reconnectez-vous avec ce lien.' : texteErreur(e.code));
+      $('lOui').disabled = false;
+    }
+  };
+}
 function versionPlusPetite(a, b) {   // vrai si a < b (ex. '1.2' < '1.10')
   const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number);
   for (let i = 0; i < Math.max(x.length, y.length); i++) { const u = x[i] || 0, v = y[i] || 0; if (u !== v) return u < v; }
@@ -448,6 +471,7 @@ function renderPlus() {
   let h = '<div class="carte"><h3>Compte</h3><b>' + esc(c.nom || '') + '</b> · ' + esc(role) + '<br><small>Dernière synchronisation : ' + (S.derniere ? dateHeure(S.derniere) : 'jamais') + '</small></div>' +
     '<div class="carte"><button class="btn plein" data-act="sync">Synchroniser maintenant</button>';
   if (d.gererUtilisateurs) h += '<button class="btn" data-act="onglet" data-v="users">Gérer les utilisateurs</button>';
+  h += '<button class="btn" data-act="changerLien">Changer le lien de la passerelle</button>';
   h += '<button class="btn" data-act="sauvegarde">Sauvegarder les opérations (fichier)</button>';
   if (S.installPrompt) h += '<button class="btn" data-act="installer">Installer l\'application</button>';
   h += '<button class="btn danger" data-act="deconnexion">Se déconnecter</button></div>' +
@@ -672,6 +696,7 @@ document.addEventListener('click', async ev => {
   else if (a === 'connexion') connexion();
   else if (a === 'deconnexion') deconnexion();
   else if (a === 'sauvegarde') sauvegarde();
+  else if (a === 'changerLien') changerLien('');
   else if (a === 'installer' && S.installPrompt) { S.installPrompt.prompt(); S.installPrompt = null; render(); }
   else if (a === 'nouveauProduit') { if (droits().creerProduit) formProduit(); else passerelleAncienne(); }
   else if (a === 'userAjouter') formUser(null);
@@ -714,7 +739,11 @@ async function init() {
   render();
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   setInterval(tic, 30000);
-  if (S.config) lancerSync();
+  const uParam = new URLSearchParams(location.search).get('u');
+  if (S.config && uParam && uParam !== S.config.url && lienValide(uParam)) {
+    changerLien(uParam);
+    history.replaceState(null, '', location.pathname);
+  } else if (S.config) lancerSync();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 init();
